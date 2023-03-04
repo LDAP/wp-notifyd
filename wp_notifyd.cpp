@@ -65,7 +65,7 @@ class Wireplumber {
         Node(Wireplumber* wp) : wp(wp) {
             notify = notify_notification_new("", "", NULL);
             notify_notification_set_timeout(notify, NOTIFICATION_TIMEOUT_MS);
-
+            notify_notification_set_hint_int32(notify, "transient", 1);
         }
 
         ~Node() {
