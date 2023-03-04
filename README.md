@@ -21,3 +21,9 @@ meson install
 ```bash
 wp-notifyd
 ```
+
+## Uninstall
+```bash
+cd build
+sudo ninja uninstall
+```
