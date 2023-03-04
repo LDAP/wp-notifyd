@@ -10,7 +10,8 @@ Currently, these actions show a notification:
 
 ## Installing
 ```bash
-# Clone this project
+git clone https://github.com/LDAP/wp-notifyd
+cd wp-notifyd
 meson setup build
 cd build
 meson install
