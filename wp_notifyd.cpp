@@ -128,9 +128,11 @@ class Wireplumber {
             }
 
             // Show notification if state changed
-            if (state_changed) {
+            if (state_changed && state_valid) {
                 show_notification();
             }
+
+            state_valid = true;
         }
 
         void show_notification() {
@@ -147,6 +149,7 @@ class Wireplumber {
         Wireplumber* wp;
         NotifyNotification* notify;
         uint32_t id = 0;
+        bool state_valid = false;
         gchar* name = nullptr;
         gboolean mute = false;
         gdouble volume = 0;
