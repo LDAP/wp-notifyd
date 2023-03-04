@@ -19,7 +19,7 @@ src_files = files(
 )
 
 exe = executable(
-    'wp_notifyd',
+    'wp-notifyd',
     src_files,
     dependencies: [
         fmt,
