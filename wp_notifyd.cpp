@@ -294,8 +294,11 @@ int main(int argc, char** argv) {
         fmt::print("{} takes no arguments.\n", argv[0]);
         return 1;
     }
-    // spdlog::set_level(spdlog::level::debug);
-    // spdlog::info("Set log level to debug");
+
+    #ifdef DEBUG
+    spdlog::set_level(spdlog::level::debug);
+    spdlog::info("Set log level to debug");
+    #endif
 
     notify_init("wp_notifyd");
     wp = new Wireplumber();

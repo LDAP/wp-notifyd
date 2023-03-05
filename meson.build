@@ -9,6 +9,10 @@ project(
     ]
 )
 
+if get_option('buildtype').startswith('debug')
+  add_project_arguments('-DDEBUG', language : 'cpp')
+endif
+
 fmt = dependency('fmt', version : ['>=8.1.1'], fallback : ['fmt', 'fmt_dep'])
 libnotify = dependency('libnotify')
 libwireplumber = dependency('wireplumber-0.4')
