@@ -1,6 +1,6 @@
 # wp-notifyd
 
-A daemon that adds notifications to Wireplumber.
+A notification daemon for Wireplumber.
 
 Currently, these actions show a notification:
 
@@ -8,22 +8,31 @@ Currently, these actions show a notification:
 - Changing volume on a default device
 - Muting or Unmuting a default device
 
-## Installing
+## Installation
+
+### Building from source
 ```bash
 git clone https://github.com/LDAP/wp-notifyd
 cd wp-notifyd
 meson setup build
 cd build
+meson compile
+
+# Running
+./wp-notifyd
+
+# Install
 meson install
-```
 
-## Running
-```bash
-wp-notifyd
-```
-
-## Uninstall
-```bash
-cd build
+# Uninstall
 sudo ninja uninstall
 ```
+
+### Debug
+Compile with `--buildtype=debug`
+```bash
+meson setup build --buildtype=debug
+cd build
+meson compile
+```
+
