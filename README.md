@@ -6,7 +6,7 @@ Currently, these actions show a notification:
 
 - Changing a default device (a default sink or source)
 - Changing volume on a default device
-- Muting or Unmuting a default device
+- Muting or unmuting a default device
 
 ## Installation
 
