@@ -15,7 +15,7 @@ endif
 
 fmt = dependency('fmt', version : ['>=8.1.1'], fallback : ['fmt', 'fmt_dep'])
 libnotify = dependency('libnotify')
-libwireplumber = dependency('wireplumber-0.4')
+libwireplumber = dependency('wireplumber-0.5')
 spdlog = dependency('spdlog', version : ['>=1.10.0'], fallback : ['spdlog', 'spdlog_dep'], default_options : ['external_fmt=enabled'])
 
 src_files = files(

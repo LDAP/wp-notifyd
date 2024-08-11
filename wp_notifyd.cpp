@@ -60,7 +60,7 @@ class MediaClassSource : public MediaClass<MediaClassSource> {
 };
 
 class Wireplumber {
-    template <typename NodeMediaClass=MediaClassSink> class Node {
+    template <typename NodeMediaClass = MediaClassSink> class Node {
       public:
         Node(Wireplumber* wp) : wp(wp) {
             notify = notify_notification_new("", "", NULL);
@@ -136,9 +136,10 @@ class Wireplumber {
         }
 
         void show_notification() {
-            notify_notification_update(notify, NodeMediaClass::get_instance()->get_notification_title(), name, NodeMediaClass::get_instance()->get_icon(volume, mute));
+            notify_notification_update(notify, NodeMediaClass::get_instance()->get_notification_title(), name,
+                                       NodeMediaClass::get_instance()->get_icon(volume, mute));
             notify_notification_set_hint_int32(notify, "value", !mute * (gint)(volume * 100));
-            notify_notification_show (notify, NULL);
+            notify_notification_show(notify, NULL);
         }
 
         uint32_t get_id() {
@@ -160,16 +161,13 @@ class Wireplumber {
         spdlog::debug("Initialize Wireplumber");
         wp_init(WP_INIT_PIPEWIRE);
 
-        _wp_core = wp_core_new(NULL, NULL);
+        _wp_core = wp_core_new(nullptr, nullptr, nullptr);
         _wp_object_manager = wp_object_manager_new();
 
         wp_manager_declare_interest();
-        wp_load_plugins();
         wp_connect();
-
         g_signal_connect_swapped(_wp_object_manager, "installed", (GCallback)on_object_manager_installed, this);
-        // activate plugins, when all are active calls wp_core_install_object_manager
-        activate_plugins();
+        wp_load_plugins();
     }
     ~Wireplumber() {
         g_object_unref(_wp_object_manager);
@@ -191,21 +189,46 @@ class Wireplumber {
         spdlog::debug("Loading wp defaults and mixer plugin");
         g_autoptr(GError) error = NULL;
 
-        if (!wp_core_load_component(_wp_core, "libwireplumber-module-default-nodes-api", "module", NULL, &error)) {
-            spdlog::error(error->message);
-            throw std::runtime_error(error->message);
-        }
-
-        if (!wp_core_load_component(_wp_core, "libwireplumber-module-mixer-api", "module", NULL, &error)) {
-            spdlog::error(error->message);
-            throw std::runtime_error(error->message);
-        }
-
-        _wp_plugin_defaults = wp_plugin_find(_wp_core, "default-nodes-api");
-        _wp_plugin_mixer = wp_plugin_find(_wp_core, "mixer-api");
-        /* cubic scaling */
-        g_object_set(G_OBJECT(_wp_plugin_mixer), "scale", 1, NULL);
+        wp_core_load_component(_wp_core, "libwireplumber-module-default-nodes-api", "module", NULL, "default-nodes-api",
+                               NULL, (GAsyncReadyCallback)on_default_nodes_api_loaded, this);
     }
+    static void on_default_nodes_api_loaded(WpObject* p, GAsyncResult* res, Wireplumber* self) {
+        spdlog::debug("loading default node api");
+
+        gboolean success = FALSE;
+        g_autoptr(GError) error = nullptr;
+        success = wp_core_load_component_finish(self->_wp_core, res, &error);
+
+        if (success == FALSE) {
+            spdlog::error(error->message);
+            throw std::runtime_error(error->message);
+        }
+
+        self->_wp_plugin_defaults = wp_plugin_find(self->_wp_core, "default-nodes-api");
+
+        wp_core_load_component(self->_wp_core, "libwireplumber-module-mixer-api", "module", NULL, "mixer-api", NULL,
+                               (GAsyncReadyCallback)on_mixer_api_loaded, self);
+    }
+    static void on_mixer_api_loaded(WpObject* p, GAsyncResult* res, Wireplumber* self) {
+        spdlog::debug("loading mixer api");
+
+        gboolean success = FALSE;
+        g_autoptr(GError) error = nullptr;
+        success = wp_core_load_component_finish(self->_wp_core, res, &error);
+
+        if (success == FALSE) {
+            spdlog::error(error->message);
+            throw std::runtime_error(error->message);
+        }
+
+        self->_wp_plugin_mixer = wp_plugin_find(self->_wp_core, "mixer-api");
+        /* cubic scaling */
+        g_object_set(G_OBJECT(self->_wp_plugin_mixer), "scale", 1, NULL);
+
+        // activate plugins, when all are active calls wp_core_install_object_manager
+        self->activate_plugins();
+    }
+
     void wp_connect() {
         spdlog::debug("Connecting Wireplumber core to PipeWire...");
 
@@ -295,10 +318,10 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    #ifdef DEBUG
+#ifndef DEBUG
     spdlog::set_level(spdlog::level::debug);
     spdlog::info("Set log level to debug");
-    #endif
+#endif
 
     notify_init("wp_notifyd");
     wp = new Wireplumber();
