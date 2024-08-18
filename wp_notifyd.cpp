@@ -318,7 +318,7 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-#ifndef DEBUG
+#ifdef DEBUG
     spdlog::set_level(spdlog::level::debug);
     spdlog::info("Set log level to debug");
 #endif
